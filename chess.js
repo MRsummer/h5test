@@ -203,9 +203,29 @@ class ChessGame {
         const x = Math.floor((canvasX - this.marginX) / this.cellWidth);
         const y = Math.floor((canvasY - this.marginY) / this.cellHeight);
         
-        if (x < 0 || x >= 9 || y < 0 || y >= 10) return;
+        console.log('点击位置:', {
+            clientX: event.clientX,
+            clientY: event.clientY,
+            rect: rect,
+            scaleX: scaleX,
+            scaleY: scaleY,
+            canvasX: canvasX,
+            canvasY: canvasY,
+            marginX: this.marginX,
+            marginY: this.marginY,
+            cellWidth: this.cellWidth,
+            cellHeight: this.cellHeight,
+            x: x,
+            y: y
+        });
+        
+        if (x < 0 || x >= 9 || y < 0 || y >= 10) {
+            console.log('点击位置超出棋盘范围');
+            return;
+        }
         
         const clickedPiece = this.board[x][y];
+        console.log('点击的棋子:', clickedPiece);
         
         if (this.selectedPiece) {
             // 尝试移动棋子
@@ -222,6 +242,7 @@ class ChessGame {
                 // 选择新的红方棋子
                 this.selectedPiece = { x, y, piece: clickedPiece };
                 this.validMoves = this.getValidMoves(x, y);
+                console.log('选择新的红方棋子，有效移动:', this.validMoves);
                 this.drawBoard();
             } else {
                 this.selectedPiece = null;
@@ -232,6 +253,7 @@ class ChessGame {
             // 选择红方棋子
             this.selectedPiece = { x, y, piece: clickedPiece };
             this.validMoves = this.getValidMoves(x, y);
+            console.log('选择红方棋子，有效移动:', this.validMoves);
             this.drawBoard();
         }
     }
