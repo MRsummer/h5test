@@ -300,7 +300,7 @@ class Tetris {
     }
 }
 
-// 初始化游戏
-window.onload = () => {
+// 确保 DOM 加载完成后再初始化游戏
+document.addEventListener('DOMContentLoaded', () => {
     new Tetris();
-}; 
+}); 
