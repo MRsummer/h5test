@@ -46,9 +46,13 @@ class Tetris {
         this.lastTime = 0;
         
         // 绑定事件
-        document.addEventListener('keydown', this.handleKeyPress.bind(this));
         document.getElementById('start-game').addEventListener('click', this.startGame.bind(this));
         document.getElementById('pause-game').addEventListener('click', this.togglePause.bind(this));
+        document.getElementById('move-left').addEventListener('click', () => this.move(-1));
+        document.getElementById('move-right').addEventListener('click', () => this.move(1));
+        document.getElementById('rotate').addEventListener('click', () => this.rotate());
+        document.getElementById('soft-drop').addEventListener('click', () => this.drop());
+        document.getElementById('hard-drop').addEventListener('click', () => this.hardDrop());
         
         // 初始化游戏
         this.resetGame();
@@ -266,26 +270,8 @@ class Tetris {
     }
     
     handleKeyPress(event) {
-        if (this.gameOver || this.paused) return;
-        
-        switch (event.keyCode) {
-            case 37: // 左箭头
-                this.move(-1);
-                break;
-            case 39: // 右箭头
-                this.move(1);
-                break;
-            case 40: // 下箭头
-                this.drop();
-                break;
-            case 38: // 上箭头
-                this.rotate();
-                break;
-            case 32: // 空格
-                this.hardDrop();
-                break;
-        }
-        this.draw();
+        // 移除键盘控制
+        return;
     }
     
     update(time = 0) {
