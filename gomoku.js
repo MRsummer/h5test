@@ -148,11 +148,17 @@ class GomokuGame {
         this.board[x][y] = this.currentPlayer;
         this.lastMove = { x, y };
         
+        // 重绘棋盘
+        this.drawBoard();
+        
         // 检查是否获胜
         if (this.checkWin(x, y)) {
-            this.gameOver = true;
-            document.getElementById('game-status').textContent = 
-                `${this.currentPlayer === 'black' ? '黑方' : '白方'}获胜！`;
+            // 延迟显示胜利提示，确保棋子先显示
+            setTimeout(() => {
+                this.gameOver = true;
+                document.getElementById('game-status').textContent = 
+                    `${this.currentPlayer === 'black' ? '黑方' : '白方'}获胜！`;
+            }, 100);
             return;
         }
         
@@ -162,9 +168,6 @@ class GomokuGame {
         // 更新状态显示
         document.getElementById('game-status').textContent = 
             `轮到${this.currentPlayer === 'black' ? '黑方' : '白方'}走棋`;
-        
-        // 重绘棋盘
-        this.drawBoard();
         
         // 如果是AI回合，延迟执行AI移动
         if (this.currentPlayer === 'white' && !this.gameOver) {
