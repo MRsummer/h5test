@@ -282,42 +282,255 @@ class ChessGame {
         // 这里实现各种棋子的移动规则
         switch (type) {
             case '车':
-            case '车':
-                // 车的移动规则：直线移动
-                for (let i = 0; i < 9; i++) {
-                    if (i !== x) moves.push({ x: i, y });
-                    if (i !== y) moves.push({ x, y: i });
+                // 车的移动规则：直线移动，直到遇到棋子
+                // 横向移动
+                for (let i = x - 1; i >= 0; i--) {
+                    if (this.board[i][y]) {
+                        if (this.board[i][y].color !== piece.color) {
+                            moves.push({ x: i, y });
+                        }
+                        break;
+                    }
+                    moves.push({ x: i, y });
+                }
+                for (let i = x + 1; i < 9; i++) {
+                    if (this.board[i][y]) {
+                        if (this.board[i][y].color !== piece.color) {
+                            moves.push({ x: i, y });
+                        }
+                        break;
+                    }
+                    moves.push({ x: i, y });
+                }
+                // 纵向移动
+                for (let i = y - 1; i >= 0; i--) {
+                    if (this.board[x][i]) {
+                        if (this.board[x][i].color !== piece.color) {
+                            moves.push({ x, y: i });
+                        }
+                        break;
+                    }
+                    moves.push({ x, y: i });
+                }
+                for (let i = y + 1; i < 10; i++) {
+                    if (this.board[x][i]) {
+                        if (this.board[x][i].color !== piece.color) {
+                            moves.push({ x, y: i });
+                        }
+                        break;
+                    }
+                    moves.push({ x, y: i });
                 }
                 break;
+                
+            case '炮':
+                // 炮的移动规则：直线移动，吃子时需要跳过一个棋子
+                // 横向移动
+                let hasPiece = false;
+                for (let i = x - 1; i >= 0; i--) {
+                    if (this.board[i][y]) {
+                        if (hasPiece && this.board[i][y].color !== piece.color) {
+                            moves.push({ x: i, y });
+                        }
+                        hasPiece = true;
+                    } else if (!hasPiece) {
+                        moves.push({ x: i, y });
+                    }
+                }
+                hasPiece = false;
+                for (let i = x + 1; i < 9; i++) {
+                    if (this.board[i][y]) {
+                        if (hasPiece && this.board[i][y].color !== piece.color) {
+                            moves.push({ x: i, y });
+                        }
+                        hasPiece = true;
+                    } else if (!hasPiece) {
+                        moves.push({ x: i, y });
+                    }
+                }
+                // 纵向移动
+                hasPiece = false;
+                for (let i = y - 1; i >= 0; i--) {
+                    if (this.board[x][i]) {
+                        if (hasPiece && this.board[x][i].color !== piece.color) {
+                            moves.push({ x, y: i });
+                        }
+                        hasPiece = true;
+                    } else if (!hasPiece) {
+                        moves.push({ x, y: i });
+                    }
+                }
+                hasPiece = false;
+                for (let i = y + 1; i < 10; i++) {
+                    if (this.board[x][i]) {
+                        if (hasPiece && this.board[x][i].color !== piece.color) {
+                            moves.push({ x, y: i });
+                        }
+                        hasPiece = true;
+                    } else if (!hasPiece) {
+                        moves.push({ x, y: i });
+                    }
+                }
+                break;
+                
             case '马':
-            case '马':
-                // 马的移动规则：日字
+                // 马的移动规则：日字，需要考虑蹩马腿
                 const horseMoves = [
-                    { dx: 1, dy: 2 },
-                    { dx: 2, dy: 1 },
-                    { dx: 2, dy: -1 },
-                    { dx: 1, dy: -2 },
-                    { dx: -1, dy: -2 },
-                    { dx: -2, dy: -1 },
-                    { dx: -2, dy: 1 },
-                    { dx: -1, dy: 2 }
+                    { dx: 1, dy: 2, legX: 0, legY: 1 },   // 右二下一
+                    { dx: 2, dy: 1, legX: 1, legY: 0 },   // 右一下二
+                    { dx: 2, dy: -1, legX: 1, legY: 0 },  // 右一上二
+                    { dx: 1, dy: -2, legX: 0, legY: -1 }, // 右二上一
+                    { dx: -1, dy: -2, legX: 0, legY: -1 },// 左二上一
+                    { dx: -2, dy: -1, legX: -1, legY: 0 },// 左一上二
+                    { dx: -2, dy: 1, legX: -1, legY: 0 }, // 左一下二
+                    { dx: -1, dy: 2, legX: 0, legY: 1 }   // 左二下一
                 ];
+                
                 horseMoves.forEach(move => {
                     const newX = x + move.dx;
                     const newY = y + move.dy;
+                    const legX = x + move.legX;
+                    const legY = y + move.legY;
+                    
+                    // 检查目标位置是否在棋盘内
                     if (newX >= 0 && newX < 9 && newY >= 0 && newY < 10) {
-                        moves.push({ x: newX, y: newY });
+                        // 检查蹩马腿位置是否有棋子
+                        if (!this.board[legX][legY]) {
+                            // 检查目标位置是否有己方棋子
+                            const targetPiece = this.board[newX][newY];
+                            if (!targetPiece || targetPiece.color !== piece.color) {
+                                moves.push({ x: newX, y: newY });
+                            }
+                        }
                     }
                 });
                 break;
-            // 其他棋子的移动规则...
+                
+            case '相':
+            case '象':
+                // 相/象的移动规则：田字，不能过河，需要考虑象眼
+                const elephantMoves = [
+                    { dx: 2, dy: 2, eyeX: 1, eyeY: 1 },   // 右下
+                    { dx: 2, dy: -2, eyeX: 1, eyeY: -1 },  // 右上
+                    { dx: -2, dy: -2, eyeX: -1, eyeY: -1 },// 左上
+                    { dx: -2, dy: 2, eyeX: -1, eyeY: 1 }   // 左下
+                ];
+                
+                elephantMoves.forEach(move => {
+                    const newX = x + move.dx;
+                    const newY = y + move.dy;
+                    const eyeX = x + move.eyeX;
+                    const eyeY = y + move.eyeY;
+                    
+                    // 检查目标位置是否在棋盘内
+                    if (newX >= 0 && newX < 9 && newY >= 0 && newY < 10) {
+                        // 检查是否过河（相/象不能过河）
+                        if ((piece.type === '相' && newY >= 5) || 
+                            (piece.type === '象' && newY <= 4)) {
+                            // 检查象眼位置是否有棋子
+                            if (!this.board[eyeX][eyeY]) {
+                                // 检查目标位置是否有己方棋子
+                                const targetPiece = this.board[newX][newY];
+                                if (!targetPiece || targetPiece.color !== piece.color) {
+                                    moves.push({ x: newX, y: newY });
+                                }
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case '士':
+            case '仕':
+                // 士/仕的移动规则：斜线，只能在九宫格内移动
+                const advisorMoves = [
+                    { dx: 1, dy: 1 },   // 右下
+                    { dx: 1, dy: -1 },  // 右上
+                    { dx: -1, dy: -1 }, // 左上
+                    { dx: -1, dy: 1 }   // 左下
+                ];
+                
+                advisorMoves.forEach(move => {
+                    const newX = x + move.dx;
+                    const newY = y + move.dy;
+                    
+                    // 检查是否在九宫格内
+                    if (newX >= 3 && newX <= 5) {
+                        if ((piece.type === '士' && newY >= 7 && newY <= 9) || 
+                            (piece.type === '仕' && newY >= 0 && newY <= 2)) {
+                            // 检查目标位置是否有己方棋子
+                            const targetPiece = this.board[newX][newY];
+                            if (!targetPiece || targetPiece.color !== piece.color) {
+                                moves.push({ x: newX, y: newY });
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case '帅':
+            case '将':
+                // 帅/将的移动规则：直线，只能在九宫格内移动
+                const kingMoves = [
+                    { dx: 0, dy: 1 },   // 下
+                    { dx: 0, dy: -1 },  // 上
+                    { dx: 1, dy: 0 },   // 右
+                    { dx: -1, dy: 0 }   // 左
+                ];
+                
+                kingMoves.forEach(move => {
+                    const newX = x + move.dx;
+                    const newY = y + move.dy;
+                    
+                    // 检查是否在九宫格内
+                    if (newX >= 3 && newX <= 5) {
+                        if ((piece.type === '帅' && newY >= 7 && newY <= 9) || 
+                            (piece.type === '将' && newY >= 0 && newY <= 2)) {
+                            // 检查目标位置是否有己方棋子
+                            const targetPiece = this.board[newX][newY];
+                            if (!targetPiece || targetPiece.color !== piece.color) {
+                                moves.push({ x: newX, y: newY });
+                            }
+                        }
+                    }
+                });
+                break;
+                
+            case '兵':
+            case '卒':
+                // 兵/卒的移动规则：过河前只能向前，过河后可以左右移动
+                const pawnMoves = [];
+                
+                if (piece.type === '兵') {
+                    // 红方兵
+                    if (y > 0) {
+                        pawnMoves.push({ x, y: y - 1 }); // 向前
+                    }
+                    if (y <= 4) { // 过河后
+                        if (x > 0) pawnMoves.push({ x: x - 1, y }); // 向左
+                        if (x < 8) pawnMoves.push({ x: x + 1, y }); // 向右
+                    }
+                } else {
+                    // 黑方卒
+                    if (y < 9) {
+                        pawnMoves.push({ x, y: y + 1 }); // 向前
+                    }
+                    if (y >= 5) { // 过河后
+                        if (x > 0) pawnMoves.push({ x: x - 1, y }); // 向左
+                        if (x < 8) pawnMoves.push({ x: x + 1, y }); // 向右
+                    }
+                }
+                
+                pawnMoves.forEach(move => {
+                    const targetPiece = this.board[move.x][move.y];
+                    if (!targetPiece || targetPiece.color !== piece.color) {
+                        moves.push(move);
+                    }
+                });
+                break;
         }
         
-        // 过滤掉无效的移动（比如被己方棋子阻挡）
-        return moves.filter(move => {
-            const targetPiece = this.board[move.x][move.y];
-            return !targetPiece || targetPiece.color !== piece.color;
-        });
+        return moves;
     }
     
     makeMove(fromX, fromY, toX, toY) {
