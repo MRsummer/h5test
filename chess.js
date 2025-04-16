@@ -13,11 +13,18 @@ class ChessGame {
         this.isRedTurn = true;
         this.gameHistory = [];
         
-        // 初始化 Stockfish AI
-        this.engine = new Worker('stockfish.js');
-        this.engine.onmessage = (event) => this.handleEngineMessage(event);
+        // 检查是否支持 SharedArrayBuffer
+        if (typeof SharedArrayBuffer === 'undefined') {
+            console.warn('SharedArrayBuffer is not supported, using alternative engine initialization');
+            // 使用替代方案初始化引擎
+            this.engine = new Worker('stockfish.js', { type: 'module' });
+        } else {
+            // 正常初始化引擎
+            this.engine = new Worker('stockfish.js');
+        }
         
         // 绑定事件
+        this.engine.onmessage = (event) => this.handleEngineMessage(event);
         this.canvas.addEventListener('click', this.handleClick.bind(this));
         document.getElementById('start-game').addEventListener('click', this.startNewGame.bind(this));
         document.getElementById('undo-move').addEventListener('click', this.undoMove.bind(this));
