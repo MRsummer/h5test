@@ -4,11 +4,11 @@ class ChessGame {
         this.ctx = this.canvas.getContext('2d');
         
         // 设置棋盘尺寸
-        this.boardWidth = 500;  // 棋盘实际宽度
-        this.boardHeight = 560; // 棋盘实际高度
+        this.boardWidth = 320;  // 棋盘实际宽度
+        this.boardHeight = 360; // 棋盘实际高度
         this.cellWidth = this.boardWidth / 8;  // 格子宽度
         this.cellHeight = this.boardHeight / 9; // 格子高度
-        this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.8;
+        this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.7; // 棋子大小
         
         // 设置边距，确保棋盘居中
         this.marginX = (this.canvas.width - this.boardWidth) / 2;

@@ -11,30 +11,35 @@
             align-items: center;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
         }
         canvas {
             border: 1px solid #000;
-            margin: 20px;
+            margin: 10px;
             background-color: #f0d9b5;
+            max-width: 100%;
+            height: auto;
         }
         .controls {
             margin: 10px;
         }
         button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            font-size: 16px;
+            padding: 8px 16px;
+            margin: 0 5px;
+            font-size: 14px;
             cursor: pointer;
         }
         #game-status {
-            font-size: 18px;
+            font-size: 16px;
             margin: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <h1>中国象棋</h1>
-    <canvas id="chess-board" width="600" height="660"></canvas>
+    <canvas id="chess-board" width="400" height="440"></canvas>
     <div id="game-status">游戏开始！红方（玩家）先走</div>
     <div class="controls">
         <button id="start-game">新游戏</button>
