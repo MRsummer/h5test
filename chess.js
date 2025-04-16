@@ -14,7 +14,7 @@ class ChessGame {
         this.gameHistory = [];
         
         // 初始化 Stockfish AI
-        this.engine = new Worker('https://cdn.jsdelivr.net/npm/stockfish@0.10.0/stockfish.min.js');
+        this.engine = new Worker('stockfish.js');
         this.engine.onmessage = this.handleEngineMessage.bind(this);
         
         // 绑定事件
