@@ -4,15 +4,15 @@ class ChessGame {
         this.ctx = this.canvas.getContext('2d');
         
         // 设置棋盘尺寸
-        this.boardWidth = 450;  // 棋盘宽度
-        this.boardHeight = 500; // 棋盘高度
+        this.boardWidth = 500;  // 棋盘实际宽度
+        this.boardHeight = 560; // 棋盘实际高度
         this.cellWidth = this.boardWidth / 8;  // 格子宽度
         this.cellHeight = this.boardHeight / 9; // 格子高度
         this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.8;
         
-        // 设置边距
-        this.marginX = this.cellWidth / 2;
-        this.marginY = this.cellHeight / 2;
+        // 设置边距，确保棋盘居中
+        this.marginX = (this.canvas.width - this.boardWidth) / 2;
+        this.marginY = (this.canvas.height - this.boardHeight) / 2;
         
         // 初始化棋盘状态
         this.board = this.initializeBoard();
