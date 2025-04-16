@@ -21,14 +21,14 @@
             align-items: center;
             gap: 10px;
             max-width: 100%;
+            position: relative;
         }
         
         .game-info {
             display: flex;
-            gap: 10px;
+            justify-content: center;
             margin-bottom: 10px;
             width: 100%;
-            justify-content: space-between;
         }
         
         .info-panel {
@@ -83,35 +83,38 @@
             margin: 5px 0;
         }
         
-        .next-piece {
-            width: 60px;
-            height: 60px;
-            background-color: #000;
-            border: 2px solid #333;
+        #pause-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>俄罗斯方块</h1>
-        <div id="game-status">游戏开始！点击开始按钮</div>
+        <div id="game-status">游戏进行中...</div>
         <div class="game-info">
             <div class="info-panel">
                 <div>分数: <span id="score">0</span></div>
                 <div>等级: <span id="level">1</span></div>
                 <div>行数: <span id="lines">0</span></div>
             </div>
-            <div class="info-panel">
-                <div>下一个:</div>
-                <canvas id="next-piece" class="next-piece"></canvas>
-            </div>
         </div>
         <canvas id="tetris-board" width="300" height="600"></canvas>
+        <button id="pause-button">⏸️</button>
         <div class="controls">
-            <div class="control-row">
-                <button class="control-button" id="start-game">▶️</button>
-                <button class="control-button" id="pause-game">⏸️</button>
-            </div>
             <div class="control-row">
                 <button class="control-button" id="move-left">⬅️</button>
                 <button class="control-button" id="rotate">🔄</button>

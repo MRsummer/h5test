@@ -46,17 +46,16 @@ class Tetris {
         this.lastTime = 0;
         
         // 绑定事件
-        document.getElementById('start-game').addEventListener('click', this.startGame.bind(this));
-        document.getElementById('pause-game').addEventListener('click', this.togglePause.bind(this));
+        document.getElementById('pause-button').addEventListener('click', this.togglePause.bind(this));
         document.getElementById('move-left').addEventListener('click', () => this.move(-1));
         document.getElementById('move-right').addEventListener('click', () => this.move(1));
         document.getElementById('rotate').addEventListener('click', () => this.rotate());
         document.getElementById('soft-drop').addEventListener('click', () => this.drop());
         document.getElementById('hard-drop').addEventListener('click', () => this.hardDrop());
         
-        // 初始化游戏
+        // 初始化游戏并自动开始
         this.resetGame();
-        this.draw();
+        this.startGame();
     }
     
     resetGame() {
@@ -301,6 +300,8 @@ class Tetris {
     
     togglePause() {
         this.paused = !this.paused;
+        const pauseButton = document.getElementById('pause-button');
+        pauseButton.textContent = this.paused ? '▶️' : '⏸️';
         document.getElementById('game-status').textContent = 
             this.paused ? '游戏已暂停' : '游戏进行中...';
         if (!this.paused) {
