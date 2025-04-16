@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-def process_image(input_path, output_path, target_size=(200, 300)):
+def process_image(input_path, output_path, target_size=(300, 200)):
     try:
         # 打开图片
         img = Image.open(input_path)
@@ -26,11 +26,11 @@ def process_image(input_path, output_path, target_size=(200, 300)):
             top = (height - new_height) // 2
             img = img.crop((0, top, width, top + new_height))
         
-        # 调整图片大小
+        # 调整图片大小，使用高质量的重采样方法
         img = img.resize(target_size, Image.Resampling.LANCZOS)
         
-        # 保存图片
-        img.save(output_path, 'PNG', quality=95)
+        # 保存图片，提高质量设置
+        img.save(output_path, 'PNG', quality=100, optimize=False)
         print(f"Successfully processed {output_path}")
     except Exception as e:
         print(f"Error processing {input_path}: {str(e)}")
