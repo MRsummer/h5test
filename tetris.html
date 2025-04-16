@@ -41,18 +41,19 @@
         }
         
         .game-info {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-            width: 100%;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
         }
         
         .info-panel {
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 8px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
         }
         
         #tetris-board {
@@ -60,25 +61,21 @@
             border: 2px solid #333;
             max-width: 100%;
             height: auto;
+            margin-top: 50px;
         }
         
         .controls {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-        
-        .control-row {
-            display: flex;
             justify-content: center;
             gap: 10px;
+            width: 100%;
+            margin-top: 20px;
         }
         
         .control-button {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -93,12 +90,6 @@
         
         .control-button:hover {
             background-color: #45a049;
-        }
-        
-        #game-status {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 5px 0;
         }
         
         #pause-button {
@@ -122,28 +113,40 @@
 <body>
     <div class="game-container">
         <h1>俄罗斯方块</h1>
-        <div id="game-status">游戏进行中...</div>
+        <div id="game-status"></div>
         <div class="game-info">
             <div class="info-panel">
                 <div>分数: <span id="score">0</span></div>
-                <div>等级: <span id="level">1</span></div>
-                <div>行数: <span id="lines">0</span></div>
             </div>
         </div>
         <canvas id="tetris-board" width="300" height="600"></canvas>
         <button id="pause-button">⏸️</button>
         <div class="controls">
-            <div class="control-row">
-                <button class="control-button" id="move-left">⬅️</button>
-                <button class="control-button" id="rotate">🔄</button>
-                <button class="control-button" id="move-right">➡️</button>
-            </div>
-            <div class="control-row">
-                <button class="control-button" id="soft-drop">⬇️</button>
-                <button class="control-button" id="hard-drop">⏬</button>
-            </div>
+            <button class="control-button" id="move-left">⬅️</button>
+            <button class="control-button" id="rotate">🔄</button>
+            <button class="control-button" id="move-right">➡️</button>
+            <button class="control-button" id="soft-drop">⬇️</button>
+            <button class="control-button" id="hard-drop">⏬</button>
         </div>
     </div>
+    <script>
+        // 等待 DOM 完全加载
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保所有元素都已加载
+            if (document.getElementById('tetris-board') && 
+                document.getElementById('pause-button') &&
+                document.getElementById('move-left') &&
+                document.getElementById('move-right') &&
+                document.getElementById('rotate') &&
+                document.getElementById('soft-drop') &&
+                document.getElementById('hard-drop')) {
+                // 初始化游戏
+                new Tetris();
+            } else {
+                console.error('游戏元素未找到，请检查 HTML 结构');
+            }
+        });
+    </script>
     <script src="tetris.js"></script>
 </body>
 </html> 
