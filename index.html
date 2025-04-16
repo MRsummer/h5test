@@ -318,7 +318,7 @@
             <div class="header-left">
                 <img class="user-avatar-large" src="images/avatar.png" alt="用户头像">
                 <div class="user-info">
-                    <div class="user-nickname">游戏玩家</div>
+                    <div class="user-nickname">游戏玩家 <span id="commit-time"></span></div>
                     <div class="user-status">在线</div>
                 </div>
             </div>
@@ -573,5 +573,25 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // 获取最新的 Git 提交时间
+        fetch('https://api.github.com/repos/MRsummer/h5test/commits/master')
+            .then(response => response.json())
+            .then(data => {
+                const commitDate = new Date(data.commit.author.date);
+                const formattedDate = commitDate.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('commit-time').textContent = `(${formattedDate})`;
+            })
+            .catch(error => {
+                console.error('获取提交时间失败:', error);
+            });
+    </script>
 </body>
 </html>
