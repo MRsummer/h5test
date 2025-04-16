@@ -192,8 +192,16 @@ class ChessGame {
         if (!this.isRedTurn) return; // 只有红方（玩家）可以移动
         
         const rect = this.canvas.getBoundingClientRect();
-        const x = Math.floor((event.clientX - rect.left - this.marginX) / this.cellWidth);
-        const y = Math.floor((event.clientY - rect.top - this.marginY) / this.cellHeight);
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        
+        // 计算点击位置相对于画布的坐标
+        const canvasX = (event.clientX - rect.left) * scaleX;
+        const canvasY = (event.clientY - rect.top) * scaleY;
+        
+        // 计算棋盘格子坐标
+        const x = Math.floor((canvasX - this.marginX) / this.cellWidth);
+        const y = Math.floor((canvasY - this.marginY) / this.cellHeight);
         
         if (x < 0 || x >= 9 || y < 0 || y >= 10) return;
         
