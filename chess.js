@@ -13,14 +13,14 @@ class ChessGame {
         this.isRedTurn = true;
         this.gameHistory = [];
         
+        // 初始化 Stockfish AI
+        this.engine = new Worker('stockfish.js');
+        this.engine.onmessage = (event) => this.handleEngineMessage(event);
+        
         // 绑定事件
         this.canvas.addEventListener('click', this.handleClick.bind(this));
         document.getElementById('start-game').addEventListener('click', this.startNewGame.bind(this));
         document.getElementById('undo-move').addEventListener('click', this.undoMove.bind(this));
-        
-        // 初始化 Stockfish AI
-        this.engine = new Worker('stockfish.js');
-        this.engine.onmessage = this.handleEngineMessage.bind(this);
         
         // 开始新游戏
         this.startNewGame();
@@ -318,6 +318,24 @@ class ChessGame {
             this.board[lastMove.from.x][lastMove.from.y] = lastMove.piece;
             this.isRedTurn = !this.isRedTurn;
             this.drawBoard();
+        }
+    }
+    
+    handleEngineMessage(event) {
+        const message = event.data;
+        if (message.startsWith('bestmove')) {
+            const move = message.split(' ')[1];
+            if (move && move !== '(none)') {
+                // 解析 AI 的移动并执行
+                const fromX = move.charCodeAt(0) - 'a'.charCodeAt(0);
+                const fromY = 9 - (move.charCodeAt(1) - '0'.charCodeAt(0));
+                const toX = move.charCodeAt(2) - 'a'.charCodeAt(0);
+                const toY = 9 - (move.charCodeAt(3) - '0'.charCodeAt(0));
+                
+                this.makeMove(fromX, fromY, toX, toY);
+                this.isRedTurn = true;
+                this.drawBoard();
+            }
         }
     }
 }
