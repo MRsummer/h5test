@@ -13,14 +13,8 @@ class ChessGame {
         this.isRedTurn = true;
         this.gameHistory = [];
         
-        // 检查是否支持 SharedArrayBuffer
-        if (typeof SharedArrayBuffer === 'undefined') {
-            // 使用替代方案初始化引擎
-            this.engine = new Worker('stockfish.js', { type: 'module' });
-        } else {
-            // 正常初始化引擎
-            this.engine = new Worker('stockfish.js');
-        }
+        // 初始化 Stockfish AI
+        this.engine = new Worker('stockfish.js');
         
         // 绑定事件
         this.engine.onmessage = (event) => this.handleEngineMessage(event);
