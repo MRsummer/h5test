@@ -37,8 +37,6 @@ class Tetris {
         this.currentPiece = null;
         this.nextPiece = null;
         this.score = 0;
-        this.level = 1;
-        this.lines = 0;
         this.gameOver = false;
         this.paused = false;
         this.dropCounter = 0;
@@ -61,8 +59,6 @@ class Tetris {
     resetGame() {
         this.board = Array(this.rows).fill().map(() => Array(this.cols).fill(0));
         this.score = 0;
-        this.level = 1;
-        this.lines = 0;
         this.gameOver = false;
         this.paused = false;
         this.dropInterval = 1000;
@@ -250,22 +246,17 @@ class Tetris {
         
         if (linesCleared > 0) {
             this.score += this.calculateScore(linesCleared);
-            this.lines += linesCleared;
-            this.level = Math.floor(this.lines / 10) + 1;
-            this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
             this.updateScore();
         }
     }
     
     calculateScore(lines) {
         const points = [0, 40, 100, 300, 1200];
-        return points[lines] * this.level;
+        return points[lines];
     }
     
     updateScore() {
         document.getElementById('score').textContent = this.score;
-        document.getElementById('level').textContent = this.level;
-        document.getElementById('lines').textContent = this.lines;
     }
     
     handleKeyPress(event) {
@@ -293,7 +284,7 @@ class Tetris {
             this.resetGame();
         }
         this.paused = false;
-        document.getElementById('game-status').textContent = '游戏进行中...';
+        document.getElementById('game-status').textContent = '';
         this.lastTime = 0;
         this.update();
     }
@@ -302,8 +293,6 @@ class Tetris {
         this.paused = !this.paused;
         const pauseButton = document.getElementById('pause-button');
         pauseButton.textContent = this.paused ? '▶️' : '⏸️';
-        document.getElementById('game-status').textContent = 
-            this.paused ? '游戏已暂停' : '游戏进行中...';
         if (!this.paused) {
             this.lastTime = 0;
             this.update();
