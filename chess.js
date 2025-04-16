@@ -19,7 +19,7 @@ class ChessGame {
         document.getElementById('undo-move').addEventListener('click', this.undoMove.bind(this));
         
         // 初始化 Stockfish AI
-        this.engine = new Worker('https://cdn.jsdelivr.net/npm/stockfish@16.0.0/stockfish.min.js');
+        this.engine = new Worker('stockfish.js');
         this.engine.onmessage = this.handleEngineMessage.bind(this);
         
         // 开始新游戏
