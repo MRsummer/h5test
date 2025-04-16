@@ -199,7 +199,7 @@ class ChessGame {
         const canvasX = (event.clientX - rect.left) * scaleX;
         const canvasY = (event.clientY - rect.top) * scaleY;
         
-        // 计算棋盘格子坐标
+        // 计算棋盘格子坐标，考虑边距
         const x = Math.floor((canvasX - this.marginX) / this.cellWidth);
         const y = Math.floor((canvasY - this.marginY) / this.cellHeight);
         
@@ -219,8 +219,22 @@ class ChessGame {
             y: y
         });
         
+        // 检查点击是否在棋盘范围内
         if (x < 0 || x >= 9 || y < 0 || y >= 10) {
             console.log('点击位置超出棋盘范围');
+            return;
+        }
+        
+        // 检查点击是否在棋子的有效范围内
+        const pieceCenterX = this.marginX + x * this.cellWidth;
+        const pieceCenterY = this.marginY + y * this.cellHeight;
+        const distance = Math.sqrt(
+            Math.pow(canvasX - pieceCenterX, 2) + 
+            Math.pow(canvasY - pieceCenterY, 2)
+        );
+        
+        if (distance > this.pieceSize / 2) {
+            console.log('点击位置不在棋子范围内');
             return;
         }
         
