@@ -189,7 +189,8 @@ class ChessGame {
                 this.validMoves = [];
                 this.isRedTurn = false;
                 this.drawBoard();
-                this.makeAIMove();
+                // 延迟 AI 移动，让玩家有时间看到自己的移动
+                setTimeout(() => this.makeAIMove(), 500);
             } else if (clickedPiece && clickedPiece.color === 'red') {
                 // 选择新的红方棋子
                 this.selectedPiece = { x, y, piece: clickedPiece };
@@ -216,7 +217,6 @@ class ChessGame {
         const type = piece.type;
         
         // 这里实现各种棋子的移动规则
-        // 简化版：只实现基本的移动规则
         switch (type) {
             case '车':
             case '车':
