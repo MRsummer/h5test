@@ -1,43 +1,61 @@
-import requests
-from PIL import Image
-from io import BytesIO
 import os
+from PIL import Image
 
-# 游戏图片URL列表 - 使用更可靠的图片源
-game_images = {
-    'game1.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 狼人杀
-    'game2.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 谁是卧底
-    'game3.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 麻将
-    'game4.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 斗地主
-    'game5.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # UNO
-    'game6.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 拆弹猫
-    'game7.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop',  # 五子棋
-    'game8.png': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=300&fit=crop'   # 象棋
-}
-
-def download_and_process_image(url, filename, target_size=(200, 300)):
+def process_image(input_path, output_path, target_size=(200, 300)):
     try:
-        # 下载图片
-        response = requests.get(url)
-        if response.status_code == 200:
-            # 打开图片
-            img = Image.open(BytesIO(response.content))
-            
-            # 调整图片大小
-            img = img.resize(target_size, Image.Resampling.LANCZOS)
-            
-            # 保存图片
-            img.save(os.path.join('images', filename), 'PNG')
-            print(f"Successfully processed {filename}")
-        else:
-            print(f"Failed to download {filename}")
+        # 打开图片
+        img = Image.open(input_path)
+        
+        # 转换为RGB模式（如果是RGBA）
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
+        
+        # 计算裁剪区域以保持比例
+        width, height = img.size
+        target_ratio = target_size[0] / target_size[1]
+        current_ratio = width / height
+        
+        if current_ratio > target_ratio:
+            # 图片太宽，需要裁剪宽度
+            new_width = int(height * target_ratio)
+            left = (width - new_width) // 2
+            img = img.crop((left, 0, left + new_width, height))
+        elif current_ratio < target_ratio:
+            # 图片太高，需要裁剪高度
+            new_height = int(width / target_ratio)
+            top = (height - new_height) // 2
+            img = img.crop((0, top, width, top + new_height))
+        
+        # 调整图片大小
+        img = img.resize(target_size, Image.Resampling.LANCZOS)
+        
+        # 保存图片
+        img.save(output_path, 'PNG', quality=95)
+        print(f"Successfully processed {output_path}")
     except Exception as e:
-        print(f"Error processing {filename}: {str(e)}")
+        print(f"Error processing {input_path}: {str(e)}")
 
 # 确保images目录存在
 if not os.path.exists('images'):
     os.makedirs('images')
 
-# 下载并处理所有图片
-for filename, url in game_images.items():
-    download_and_process_image(url, filename) 
+# 处理所有游戏图片
+game_files = {
+    '狼人杀.jpeg': 'game1.png',
+    '谁是卧底.png': 'game2.png',
+    '麻将.jpeg': 'game3.png',
+    '斗地主.jpeg': 'game4.png',
+    'UNO.jpeg': 'game5.png',
+    '拆弹猫.jpeg': 'game6.png',
+    '五子棋.jpeg': 'game7.png',
+    '象棋.jpeg': 'game8.png'
+}
+
+# 处理每张图片
+for input_filename, output_filename in game_files.items():
+    input_path = os.path.join('images', input_filename)
+    output_path = os.path.join('images', output_filename)
+    if os.path.exists(input_path):
+        process_image(input_path, output_path)
+    else:
+        print(f"Warning: {input_path} not found") 
