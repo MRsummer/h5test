@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏社交平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #F8F8F8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #F8F8F8;
+        }
+
+        .header {
+            height: 60px;
+            background-color: #F8F8F8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            color: #333333;
+        }
+
+        .header-button-icon {
+            font-size: 20px;
+        }
+
+        .header-button-text {
+            font-size: 12px;
+        }
+
+        .user-avatar-large {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .user-nickname {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #F0F0F0;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #333333;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin: 10px;
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        .more-icon {
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+
+        .more-icon::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 6px;
+            height: 6px;
+            border-top: 2px solid #999999;
+            border-right: 2px solid #999999;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .game-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .game-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border-radius: 0 0 8px 8px;
+        }
+
+        .game-name {
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .room-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .room-item {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .room-image {
+            width: 100%;
+            height: 160px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .room-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .room-title {
+            color: #FFFFFF;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .room-user {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .user-avatar {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .user-name {
+            color: #FFFFFF;
+            font-size: 10px;
+        }
+
+        .room-tags {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .tag {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+
+        .room-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            margin-right: 4px;
+        }
+
+        .stat-value {
+            color: #FFFFFF;
+            font-size: 10px;
+        }
+
+        .tabbar {
+            height: 50px;
+            background-color: #FFFFFF;
+            border-top: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px 0;
+            gap: 4px;
+        }
+
+        .tab-item.active {
+            color: #FF6B6B;
+        }
+
+        .tab-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .tab-text {
+            font-size: 10px;
+            color: #999999;
+        }
+
+        .tab-item.active .tab-text {
+            color: #FF6B6B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <div class="header">
+            <div class="header-left">
+                <img class="user-avatar-large" src="images/avatar.png" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-nickname">游戏玩家</div>
+                    <div class="user-status">在线</div>
+                </div>
+            </div>
+            <div class="header-buttons">
+                <div class="header-button">
+                    <div class="header-button-icon">🎉</div>
+                    <div class="header-button-text">活动</div>
+                </div>
+                <div class="header-button">
+                    <div class="header-button-icon">🏆</div>
+                    <div class="header-button-text">排行榜</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content">
+            <!-- 热门游戏区域 -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">热门游戏</div>
+                    <div class="more-icon"></div>
+                </div>
+                <div class="game-grid">
+                    <div class="game-item">
+                        <img class="game-image" src="images/game1.png" alt="原神">
+                        <div class="game-info">
+                            <div class="game-name">原神</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game2.png" alt="第五人格">
+                        <div class="game-info">
+                            <div class="game-name">第五人格</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game3.png" alt="王者荣耀">
+                        <div class="game-info">
+                            <div class="game-name">王者荣耀</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game4.png" alt="明日方舟">
+                        <div class="game-info">
+                            <div class="game-name">明日方舟</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game5.png" alt="和平精英">
+                        <div class="game-info">
+                            <div class="game-name">和平精英</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game6.png" alt="崩坏：星穹铁道">
+                        <div class="game-info">
+                            <div class="game-name">崩坏：星穹铁道</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game7.png" alt="阴阳师">
+                        <div class="game-info">
+                            <div class="game-name">阴阳师</div>
+                        </div>
+                    </div>
+                    <div class="game-item">
+                        <img class="game-image" src="images/game8.png" alt="英雄联盟">
+                        <div class="game-info">
+                            <div class="game-name">英雄联盟</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 热门语音房区域 -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">热门语音房</div>
+                    <div class="more-icon"></div>
+                </div>
+                <div class="room-list">
+                    <div class="room-item">
+                        <img class="room-image" src="images/room1.png" alt="LOL开黑房">
+                        <div class="room-info">
+                            <div class="room-title">LOL开黑房</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="电竞少年">
+                                <div class="user-name">电竞少年</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">英雄联盟</div>
+                                <div class="tag">竞技</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">2.5k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">2.8k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-item">
+                        <img class="room-image" src="images/room2.png" alt="一起开黑">
+                        <div class="room-info">
+                            <div class="room-title">一起开黑</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="战神">
+                                <div class="user-name">战神</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">和平精英</div>
+                                <div class="tag">竞技</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">3.2k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">1.5k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-item">
+                        <img class="room-image" src="images/room3.png" alt="来玩王者啊~">
+                        <div class="room-info">
+                            <div class="room-title">来玩王者啊~</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="小鱼儿">
+                                <div class="user-name">小鱼儿</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">王者荣耀</div>
+                                <div class="tag">竞技</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">2.8k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">1.8k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-item">
+                        <img class="room-image" src="images/room4.png" alt="深夜电台">
+                        <div class="room-info">
+                            <div class="room-title">深夜电台</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="月光">
+                                <div class="user-name">月光</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">聊天</div>
+                                <div class="tag">音乐</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">1.5k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">2.1k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-item">
+                        <img class="room-image" src="images/room5.png" alt="午夜音乐会">
+                        <div class="room-info">
+                            <div class="room-title">午夜音乐会</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="小提琴手">
+                                <div class="user-name">小提琴手</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">音乐</div>
+                                <div class="tag">古典</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">1.8k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">1.5k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-item">
+                        <img class="room-image" src="images/room6.png" alt="情感夜话">
+                        <div class="room-info">
+                            <div class="room-title">情感夜话</div>
+                            <div class="room-user">
+                                <img class="user-avatar" src="images/avatar.png" alt="心理咨询师小美">
+                                <div class="user-name">心理咨询师小美</div>
+                            </div>
+                            <div class="room-tags">
+                                <div class="tag">情感</div>
+                                <div class="tag">聊天</div>
+                            </div>
+                            <div class="room-stats">
+                                <div class="stat-item">
+                                    <div class="stat-icon">❤️</div>
+                                    <div class="stat-value">2.1k</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-icon">💬</div>
+                                    <div class="stat-value">1.5k</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="tabbar">
+            <div class="tab-item active">
+                <div class="tab-icon">🏠</div>
+                <div class="tab-text">首页</div>
+            </div>
+            <div class="tab-item">
+                <div class="tab-icon">🎤</div>
+                <div class="tab-text">语音房</div>
+            </div>
+            <div class="tab-item">
+                <div class="tab-icon">💬</div>
+                <div class="tab-text">消息</div>
+            </div>
+            <div class="tab-item">
+                <div class="tab-icon">📋</div>
+                <div class="tab-text">广场</div>
+            </div>
+            <div class="tab-item">
+                <div class="tab-icon">👤</div>
+                <div class="tab-text">我的</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
