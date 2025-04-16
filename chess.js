@@ -13,14 +13,14 @@ class ChessGame {
         this.isRedTurn = true;
         this.gameHistory = [];
         
-        // 初始化 Stockfish AI
-        this.engine = new Worker('stockfish.js');
-        this.engine.onmessage = this.handleEngineMessage.bind(this);
-        
         // 绑定事件
         this.canvas.addEventListener('click', this.handleClick.bind(this));
         document.getElementById('start-game').addEventListener('click', this.startNewGame.bind(this));
         document.getElementById('undo-move').addEventListener('click', this.undoMove.bind(this));
+        
+        // 初始化 Stockfish AI
+        this.engine = new Worker('https://cdn.jsdelivr.net/npm/stockfish@16.0.0/stockfish.min.js');
+        this.engine.onmessage = this.handleEngineMessage.bind(this);
         
         // 开始新游戏
         this.startNewGame();
@@ -271,67 +271,34 @@ class ChessGame {
     }
     
     makeAIMove() {
-        // 使用 Stockfish 计算最佳移动
-        this.engine.postMessage('position fen ' + this.getFEN());
-        this.engine.postMessage('go depth 10');
-    }
-    
-    handleEngineMessage(event) {
-        const message = event.data;
-        if (message.startsWith('bestmove')) {
-            const move = message.split(' ')[1];
-            if (move && move !== '(none)') {
-                // 解析 AI 的移动并执行
-                const fromX = move.charCodeAt(0) - 'a'.charCodeAt(0);
-                const fromY = 9 - (move.charCodeAt(1) - '0'.charCodeAt(0));
-                const toX = move.charCodeAt(2) - 'a'.charCodeAt(0);
-                const toY = 9 - (move.charCodeAt(3) - '0'.charCodeAt(0));
-                
-                this.makeMove(fromX, fromY, toX, toY);
-                this.isRedTurn = true;
-                this.drawBoard();
-            }
-        }
-    }
-    
-    getFEN() {
-        // 将当前棋盘状态转换为 FEN 格式
-        let fen = '';
-        for (let y = 0; y < 10; y++) {
-            let empty = 0;
-            for (let x = 0; x < 9; x++) {
+        // 简单的 AI 策略：随机选择一个黑方棋子，然后随机选择一个有效移动
+        const blackPieces = [];
+        for (let x = 0; x < 9; x++) {
+            for (let y = 0; y < 10; y++) {
                 const piece = this.board[x][y];
-                if (piece) {
-                    if (empty > 0) {
-                        fen += empty;
-                        empty = 0;
+                if (piece && piece.color === 'black') {
+                    const moves = this.getValidMoves(x, y);
+                    if (moves.length > 0) {
+                        blackPieces.push({ x, y, moves });
                     }
-                    fen += this.getPieceChar(piece);
-                } else {
-                    empty++;
                 }
             }
-            if (empty > 0) {
-                fen += empty;
-            }
-            if (y < 9) {
-                fen += '/';
-            }
         }
-        return fen;
-    }
-    
-    getPieceChar(piece) {
-        const chars = {
-            '帅': 'K', '将': 'k',
-            '士': 'A', '仕': 'a',
-            '相': 'B', '象': 'b',
-            '马': 'N', '马': 'n',
-            '车': 'R', '车': 'r',
-            '炮': 'C', '炮': 'c',
-            '兵': 'P', '卒': 'p'
-        };
-        return piece.color === 'red' ? chars[piece.type] : chars[piece.type].toLowerCase();
+        
+        if (blackPieces.length > 0) {
+            // 随机选择一个棋子
+            const randomPiece = blackPieces[Math.floor(Math.random() * blackPieces.length)];
+            // 随机选择一个移动
+            const randomMove = randomPiece.moves[Math.floor(Math.random() * randomPiece.moves.length)];
+            
+            // 执行移动
+            this.makeMove(randomPiece.x, randomPiece.y, randomMove.x, randomMove.y);
+            this.isRedTurn = true;
+            this.drawBoard();
+            
+            // 更新游戏状态
+            document.getElementById('game-status').textContent = '轮到红方（玩家）走棋';
+        }
     }
     
     startNewGame() {
