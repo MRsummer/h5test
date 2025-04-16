@@ -295,35 +295,10 @@ class ChessGame {
             return;
         }
         
-        // 计算点击位置到格子中心的距离
-        const pieceCenterX = this.marginX + x * this.cellWidth;
-        const pieceCenterY = this.marginY + y * this.cellHeight;
-        const distance = Math.sqrt(
-            Math.pow(canvasX - pieceCenterX, 2) + 
-            Math.pow(canvasY - pieceCenterY, 2)
-        );
-        
-        // 增大点击范围，使用格子大小的一半作为判定范围
-        const clickRadius = Math.min(this.cellWidth, this.cellHeight) * 0.5;
-        
-        if (distance > clickRadius) {
-            console.log('点击位置不在棋子范围内');
-            return;
-        }
-        
         const clickedPiece = this.board[x][y];
-        console.log('点击的棋子:', clickedPiece);
         
+        // 如果点击的是有效移动位置，直接处理移动
         if (this.selectedPiece) {
-            // 如果点击的是同一个棋子，取消选中
-            if (this.selectedPiece.x === x && this.selectedPiece.y === y) {
-                this.selectedPiece = null;
-                this.validMoves = [];
-                this.drawBoard();
-                return;
-            }
-            
-            // 尝试移动棋子
             const move = this.validMoves.find(m => m.x === x && m.y === y);
             if (move) {
                 // 开始移动动画
@@ -339,16 +314,20 @@ class ChessGame {
                 this.makeMove(this.selectedPiece.x, this.selectedPiece.y, x, y);
                 this.selectedPiece = null;
                 this.validMoves = [];
-                
-            } else if (clickedPiece && clickedPiece.color === 'red') {
-                // 选择新的红方棋子
-                this.selectedPiece = { x, y, piece: clickedPiece };
-                this.validMoves = this.getValidMoves(x, y);
-                console.log('选择新的红方棋子，有效移动:', this.validMoves);
-                this.drawBoard();
+                return;
             }
-        } else if (clickedPiece && clickedPiece.color === 'red') {
-            // 选择红方棋子
+        }
+        
+        // 如果点击的是同一个棋子，取消选中
+        if (this.selectedPiece && this.selectedPiece.x === x && this.selectedPiece.y === y) {
+            this.selectedPiece = null;
+            this.validMoves = [];
+            this.drawBoard();
+            return;
+        }
+        
+        // 如果点击的是红方棋子，选中它
+        if (clickedPiece && clickedPiece.color === 'red') {
             this.selectedPiece = { x, y, piece: clickedPiece };
             this.validMoves = this.getValidMoves(x, y);
             console.log('选择红方棋子，有效移动:', this.validMoves);
