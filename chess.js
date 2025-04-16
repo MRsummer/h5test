@@ -8,7 +8,7 @@ class ChessGame {
         this.boardHeight = 360; // 棋盘实际高度
         this.cellWidth = this.boardWidth / 8;  // 格子宽度
         this.cellHeight = this.boardHeight / 9; // 格子高度
-        this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.7; // 棋子大小
+        this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.85; // 增大棋子尺寸
         
         // 设置边距，确保棋盘居中
         this.marginX = (this.canvas.width - this.boardWidth) / 2;
@@ -21,13 +21,90 @@ class ChessGame {
         this.isRedTurn = true;
         this.gameHistory = [];
         
+        // 动画相关
+        this.animatingPiece = null;
+        this.animationStart = null;
+        this.animationDuration = 300; // 300ms
+        
         // 绑定事件
         this.canvas.addEventListener('click', this.handleClick.bind(this));
         document.getElementById('start-game').addEventListener('click', this.startNewGame.bind(this));
         document.getElementById('undo-move').addEventListener('click', this.undoMove.bind(this));
         
+        // 开始动画循环
+        this.animate();
+        
         // 开始新游戏
         this.startNewGame();
+    }
+    
+    animate(currentTime) {
+        if (this.animatingPiece) {
+            if (!this.animationStart) {
+                this.animationStart = currentTime;
+            }
+            
+            const elapsed = currentTime - this.animationStart;
+            const progress = Math.min(elapsed / this.animationDuration, 1);
+            
+            // 使用缓动函数使动画更自然
+            const easeProgress = this.easeInOutQuad(progress);
+            
+            // 计算当前位置
+            const startX = this.marginX + this.animatingPiece.startX * this.cellWidth;
+            const startY = this.marginY + this.animatingPiece.startY * this.cellHeight;
+            const endX = this.marginX + this.animatingPiece.endX * this.cellWidth;
+            const endY = this.marginY + this.animatingPiece.endY * this.cellHeight;
+            
+            const currentX = startX + (endX - startX) * easeProgress;
+            const currentY = startY + (endY - startY) * easeProgress;
+            
+            // 重绘棋盘
+            this.drawBoard();
+            
+            // 绘制移动中的棋子
+            if (progress < 1) {
+                this.drawAnimatingPiece(currentX, currentY);
+                requestAnimationFrame(this.animate.bind(this));
+            } else {
+                // 动画结束
+                this.animatingPiece = null;
+                this.animationStart = null;
+                this.drawBoard();
+                
+                // 完成移动后切换回合
+                this.isRedTurn = !this.isRedTurn;
+                if (!this.isRedTurn) {
+                    setTimeout(() => this.makeAIMove(), 500);
+                }
+            }
+        } else {
+            requestAnimationFrame(this.animate.bind(this));
+        }
+    }
+    
+    easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+    
+    drawAnimatingPiece(x, y) {
+        const piece = this.animatingPiece.piece;
+        
+        // 绘制棋子背景
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.pieceSize / 2, 0, Math.PI * 2);
+        this.ctx.fillStyle = piece.color === 'red' ? '#ff4444' : '#000';
+        this.ctx.fill();
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        // 绘制棋子文字
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = `${this.pieceSize * 0.6}px Arial`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(piece.type, x, y);
     }
     
     initializeBoard() {
@@ -171,6 +248,15 @@ class ChessGame {
         const centerX = this.marginX + x * this.cellWidth;
         const centerY = this.marginY + y * this.cellHeight;
         
+        // 如果是选中的棋子，绘制选中效果
+        if (this.selectedPiece && this.selectedPiece.x === x && this.selectedPiece.y === y) {
+            // 绘制选中状态的光晕效果
+            this.ctx.beginPath();
+            this.ctx.arc(centerX, centerY, this.pieceSize / 1.8, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+            this.ctx.fill();
+        }
+        
         // 绘制棋子背景
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, this.pieceSize / 2, 0, Math.PI * 2);
@@ -189,7 +275,7 @@ class ChessGame {
     }
     
     handleClick(event) {
-        if (!this.isRedTurn) return; // 只有红方（玩家）可以移动
+        if (!this.isRedTurn || this.animatingPiece) return; // 动画过程中不响应点击
         
         const rect = this.canvas.getBoundingClientRect();
         const scaleX = this.canvas.width / rect.width;
@@ -203,29 +289,13 @@ class ChessGame {
         const x = Math.floor((canvasX - this.marginX) / this.cellWidth);
         const y = Math.floor((canvasY - this.marginY) / this.cellHeight);
         
-        console.log('点击位置:', {
-            clientX: event.clientX,
-            clientY: event.clientY,
-            rect: rect,
-            scaleX: scaleX,
-            scaleY: scaleY,
-            canvasX: canvasX,
-            canvasY: canvasY,
-            marginX: this.marginX,
-            marginY: this.marginY,
-            cellWidth: this.cellWidth,
-            cellHeight: this.cellHeight,
-            x: x,
-            y: y
-        });
-        
         // 检查点击是否在棋盘范围内
         if (x < 0 || x >= 9 || y < 0 || y >= 10) {
             console.log('点击位置超出棋盘范围');
             return;
         }
         
-        // 检查点击是否在棋子的有效范围内
+        // 计算点击位置到格子中心的距离
         const pieceCenterX = this.marginX + x * this.cellWidth;
         const pieceCenterY = this.marginY + y * this.cellHeight;
         const distance = Math.sqrt(
@@ -233,7 +303,10 @@ class ChessGame {
             Math.pow(canvasY - pieceCenterY, 2)
         );
         
-        if (distance > this.pieceSize / 2) {
+        // 增大点击范围，使用格子大小的一半作为判定范围
+        const clickRadius = Math.min(this.cellWidth, this.cellHeight) * 0.5;
+        
+        if (distance > clickRadius) {
             console.log('点击位置不在棋子范围内');
             return;
         }
@@ -242,25 +315,36 @@ class ChessGame {
         console.log('点击的棋子:', clickedPiece);
         
         if (this.selectedPiece) {
+            // 如果点击的是同一个棋子，取消选中
+            if (this.selectedPiece.x === x && this.selectedPiece.y === y) {
+                this.selectedPiece = null;
+                this.validMoves = [];
+                this.drawBoard();
+                return;
+            }
+            
             // 尝试移动棋子
             const move = this.validMoves.find(m => m.x === x && m.y === y);
             if (move) {
+                // 开始移动动画
+                this.animatingPiece = {
+                    piece: this.selectedPiece.piece,
+                    startX: this.selectedPiece.x,
+                    startY: this.selectedPiece.y,
+                    endX: x,
+                    endY: y
+                };
+                
+                // 更新棋盘状态
                 this.makeMove(this.selectedPiece.x, this.selectedPiece.y, x, y);
                 this.selectedPiece = null;
                 this.validMoves = [];
-                this.isRedTurn = false;
-                this.drawBoard();
-                // 延迟 AI 移动，让玩家有时间看到自己的移动
-                setTimeout(() => this.makeAIMove(), 500);
+                
             } else if (clickedPiece && clickedPiece.color === 'red') {
                 // 选择新的红方棋子
                 this.selectedPiece = { x, y, piece: clickedPiece };
                 this.validMoves = this.getValidMoves(x, y);
                 console.log('选择新的红方棋子，有效移动:', this.validMoves);
-                this.drawBoard();
-            } else {
-                this.selectedPiece = null;
-                this.validMoves = [];
                 this.drawBoard();
             }
         } else if (clickedPiece && clickedPiece.color === 'red') {
