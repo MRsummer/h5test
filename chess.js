@@ -15,7 +15,6 @@ class ChessGame {
         
         // 检查是否支持 SharedArrayBuffer
         if (typeof SharedArrayBuffer === 'undefined') {
-            console.warn('SharedArrayBuffer is not supported, using alternative engine initialization');
             // 使用替代方案初始化引擎
             this.engine = new Worker('stockfish.js', { type: 'module' });
         } else {
