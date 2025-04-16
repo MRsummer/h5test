@@ -2,9 +2,17 @@ class ChessGame {
     constructor() {
         this.canvas = document.getElementById('chess-board');
         this.ctx = this.canvas.getContext('2d');
-        this.boardSize = 450;
-        this.cellSize = this.boardSize / 8;
-        this.pieceSize = this.cellSize * 0.8;
+        
+        // 设置棋盘尺寸
+        this.boardWidth = 450;  // 棋盘宽度
+        this.boardHeight = 500; // 棋盘高度
+        this.cellWidth = this.boardWidth / 8;  // 格子宽度
+        this.cellHeight = this.boardHeight / 9; // 格子高度
+        this.pieceSize = Math.min(this.cellWidth, this.cellHeight) * 0.8;
+        
+        // 设置边距
+        this.marginX = this.cellWidth / 2;
+        this.marginY = this.cellHeight / 2;
         
         // 初始化棋盘状态
         this.board = this.initializeBoard();
@@ -83,38 +91,53 @@ class ChessGame {
         
         // 绘制棋盘背景
         this.ctx.fillStyle = '#f0d9b5';
-        this.ctx.fillRect(0, 0, this.boardSize, this.boardSize);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // 绘制网格线
+        // 设置线条样式
         this.ctx.strokeStyle = '#000';
         this.ctx.lineWidth = 1;
         
         // 绘制横线
-        for (let i = 0; i <= 9; i++) {
+        for (let i = 0; i < 10; i++) {
             this.ctx.beginPath();
-            this.ctx.moveTo(0, i * this.cellSize);
-            this.ctx.lineTo(this.boardSize, i * this.cellSize);
+            this.ctx.moveTo(this.marginX, this.marginY + i * this.cellHeight);
+            this.ctx.lineTo(this.marginX + 8 * this.cellWidth, this.marginY + i * this.cellHeight);
             this.ctx.stroke();
         }
         
         // 绘制竖线
-        for (let i = 0; i <= 8; i++) {
+        for (let i = 0; i < 9; i++) {
             this.ctx.beginPath();
-            this.ctx.moveTo(i * this.cellSize, 0);
-            this.ctx.lineTo(i * this.cellSize, this.boardSize);
+            this.ctx.moveTo(this.marginX + i * this.cellWidth, this.marginY);
+            // 河界
+            if (i === 0 || i === 8) {
+                this.ctx.lineTo(this.marginX + i * this.cellWidth, this.marginY + 9 * this.cellHeight);
+            } else {
+                // 上半部分
+                this.ctx.moveTo(this.marginX + i * this.cellWidth, this.marginY);
+                this.ctx.lineTo(this.marginX + i * this.cellWidth, this.marginY + 4 * this.cellHeight);
+                // 下半部分
+                this.ctx.moveTo(this.marginX + i * this.cellWidth, this.marginY + 5 * this.cellHeight);
+                this.ctx.lineTo(this.marginX + i * this.cellWidth, this.marginY + 9 * this.cellHeight);
+            }
             this.ctx.stroke();
         }
         
         // 绘制九宫格
+        // 上方九宫格
         this.ctx.beginPath();
-        this.ctx.moveTo(3 * this.cellSize, 0);
-        this.ctx.lineTo(5 * this.cellSize, 2 * this.cellSize);
-        this.ctx.moveTo(5 * this.cellSize, 0);
-        this.ctx.lineTo(3 * this.cellSize, 2 * this.cellSize);
-        this.ctx.moveTo(3 * this.cellSize, 7 * this.cellSize);
-        this.ctx.lineTo(5 * this.cellSize, 9 * this.cellSize);
-        this.ctx.moveTo(5 * this.cellSize, 7 * this.cellSize);
-        this.ctx.lineTo(3 * this.cellSize, 9 * this.cellSize);
+        this.ctx.moveTo(this.marginX + 3 * this.cellWidth, this.marginY);
+        this.ctx.lineTo(this.marginX + 5 * this.cellWidth, this.marginY + 2 * this.cellHeight);
+        this.ctx.moveTo(this.marginX + 5 * this.cellWidth, this.marginY);
+        this.ctx.lineTo(this.marginX + 3 * this.cellWidth, this.marginY + 2 * this.cellHeight);
+        this.ctx.stroke();
+        
+        // 下方九宫格
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.marginX + 3 * this.cellWidth, this.marginY + 7 * this.cellHeight);
+        this.ctx.lineTo(this.marginX + 5 * this.cellWidth, this.marginY + 9 * this.cellHeight);
+        this.ctx.moveTo(this.marginX + 5 * this.cellWidth, this.marginY + 7 * this.cellHeight);
+        this.ctx.lineTo(this.marginX + 3 * this.cellWidth, this.marginY + 9 * this.cellHeight);
         this.ctx.stroke();
         
         // 绘制棋子
@@ -132,8 +155,8 @@ class ChessGame {
             this.validMoves.forEach(move => {
                 this.ctx.beginPath();
                 this.ctx.arc(
-                    move.x * this.cellSize + this.cellSize / 2,
-                    move.y * this.cellSize + this.cellSize / 2,
+                    this.marginX + move.x * this.cellWidth,
+                    this.marginY + move.y * this.cellHeight,
                     this.pieceSize / 4,
                     0,
                     Math.PI * 2
@@ -145,8 +168,8 @@ class ChessGame {
     }
     
     drawPiece(x, y, piece) {
-        const centerX = x * this.cellSize + this.cellSize / 2;
-        const centerY = y * this.cellSize + this.cellSize / 2;
+        const centerX = this.marginX + x * this.cellWidth;
+        const centerY = this.marginY + y * this.cellHeight;
         
         // 绘制棋子背景
         this.ctx.beginPath();
@@ -169,8 +192,8 @@ class ChessGame {
         if (!this.isRedTurn) return; // 只有红方（玩家）可以移动
         
         const rect = this.canvas.getBoundingClientRect();
-        const x = Math.floor((event.clientX - rect.left) / this.cellSize);
-        const y = Math.floor((event.clientY - rect.top) / this.cellSize);
+        const x = Math.floor((event.clientX - rect.left - this.marginX) / this.cellWidth);
+        const y = Math.floor((event.clientY - rect.top - this.marginY) / this.cellHeight);
         
         if (x < 0 || x >= 9 || y < 0 || y >= 10) return;
         
